@@ -10,6 +10,11 @@
 
 # production
 /build
+/dist 
+/dist-ssr
+
+# secrets
+.env
 
 # misc
 .DS_Store
