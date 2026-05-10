@@ -26,6 +26,7 @@ export default function FilterBar({ searchQuery, setSearchQuery, filters, setFil
             <option value="distance">Nearest</option>
             <option value="power">Highest Power</option>
             <option value="price">Lowest Price</option>
+            <option value="rating">Highest Rating</option>
           </select>
 
           <button 
@@ -40,7 +41,7 @@ export default function FilterBar({ searchQuery, setSearchQuery, filters, setFil
       </div>
 
       {showAdvanced && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-6 mt-6 border-t border-slate-50 animate-in fade-in slide-in-from-top-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pt-6 mt-6 border-t border-slate-50 animate-in fade-in slide-in-from-top-2">
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Connector</label>
             <select 
@@ -66,6 +67,20 @@ export default function FilterBar({ searchQuery, setSearchQuery, filters, setFil
               <option value="22">22kW+</option>
               <option value="50">50kW+</option>
               <option value="150">150kW+</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">Min Rating</label>
+            <select 
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none"
+              value={filters.minRating || 0}
+              onChange={(e) => setFilters({...filters, minRating: Number(e.target.value)})}
+            >
+              <option value="0">Any Rating</option>
+              <option value="3">3.0+ Stars</option>
+              <option value="4">4.0+ Stars</option>
+              <option value="4.5">4.5+ Stars</option>
             </select>
           </div>
 

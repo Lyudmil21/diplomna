@@ -13,7 +13,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom Icon for your live location marker
 const userLocationIcon = new L.Icon({
   iconUrl: 'https://cdn-icons-png.flaticon.com/512/2991/2991195.png', 
   iconSize: [35, 35],
