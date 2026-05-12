@@ -5,6 +5,7 @@ import AddStationForm from "./Components/AddStationForm.jsx";
 import Map from "./Components/Map.jsx";
 import FilterBar from "./Components/FilterBar.jsx"; 
 import StationList from "./Components/StationList.jsx";
+import EditStationModal from "./Components/EditStationModal.jsx"; 
 import { useAuth } from "./Contexts/AuthContext.jsx";
 import { useStationFilters } from "./Components/useStationFilters.jsx";
 import { useStationData } from "./Components/useStationData.jsx"; 
@@ -13,9 +14,10 @@ function App() {
   const { user, isAdmin, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("map");
   const [addingStation, setAddingStation] = useState(false);
+  const [editingStation, setEditingStation] = useState(null); 
   const [userLocation, setUserLocation] = useState(null);
 
-  const { stations, setStations, handleApprove, handleDelete } = useStationData(user, isAdmin);
+  const { stations, setStations, handleApprove, handleDelete, handleAdminUpdate } = useStationData(user, isAdmin, loading);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -34,7 +36,7 @@ function App() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans relative">
       <Header />
 
       {!user ? <div className="mt-12 animate-in fade-in slide-in-from-bottom-4"><AuthForm /></div> : (
@@ -64,12 +66,20 @@ function App() {
               <AddStationForm onCancel={() => setAddingStation(false)} 
                 onStationAdded={(s) => { setStations(prev => [s, ...prev]); setAddingStation(false); setActiveTab("list"); }} />
             ) : activeTab === "map" ? (
-              <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} />
+              <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
             ) : (
-              <StationList stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} />
+              <StationList stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
             )}
           </main>
         </div>
+      )}
+
+      {editingStation && (
+        <EditStationModal 
+          station={editingStation} 
+          onClose={() => setEditingStation(null)} 
+          onUpdate={handleAdminUpdate} 
+        />
       )}
     </div>
   );

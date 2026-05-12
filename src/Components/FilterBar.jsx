@@ -10,7 +10,7 @@ export default function FilterBar({ searchQuery, setSearchQuery, filters, setFil
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></span>
           <input 
             type="text" 
-            placeholder="Search by city, address or name..." 
+            placeholder="Search by city, address, name or rating..." 
             className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-cyan-400 transition-all text-slate-700 font-medium"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -86,7 +86,7 @@ export default function FilterBar({ searchQuery, setSearchQuery, filters, setFil
 
           <div>
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">
-              Max Price: <span className="text-cyan-500 font-black">{filters.maxPrice} lv.</span>
+              Max Price: <span className="text-cyan-500 font-black">{filters.maxPrice} euro per kWh.</span>
             </label>
             <input 
               type="range" min="0" max="2" step="0.1" 

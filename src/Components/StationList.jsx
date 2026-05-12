@@ -1,4 +1,4 @@
-export default function StationList({ stations, isAdmin, onApprove, onDelete }) {
+export default function StationList({ stations, isAdmin, onApprove, onDelete, onEdit }) {
   const stationText = stations.length === 1 ? "Station" : "Stations";
 
   return (
@@ -54,7 +54,7 @@ export default function StationList({ stations, isAdmin, onApprove, onDelete }) 
 
                 <td className="px-4 py-4 bg-white group-hover:bg-slate-50 border-y border-slate-50 text-center transition-colors">
                   <div className="text-sm font-bold text-slate-700">
-                    {station.price ? `${station.price} lv/kWh` : "Free"}
+                    {station.price ? `${station.price} euro/kWh` : "Free"}
                   </div>
                   {station.distance && station.distance !== Infinity && (
                     <div className="text-[10px] font-black text-cyan-500 uppercase">
@@ -79,18 +79,26 @@ export default function StationList({ stations, isAdmin, onApprove, onDelete }) 
 
                 {isAdmin && (
                   <td className="px-4 py-4 bg-white group-hover:bg-slate-50 rounded-r-2xl border-y border-r border-slate-50 text-right transition-colors">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 items-center">
+                      <button 
+                        onClick={() => onEdit(station)}
+                        className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase py-2 px-3 rounded-xl transition-all active:scale-95 cursor-pointer"
+                      >
+                        Edit
+                      </button>
+
                       {!station.is_approved && (
                         <button 
                           onClick={() => onApprove(station.id)}
-                          className="bg-cyan-500 hover:bg-cyan-600 text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl shadow-md shadow-cyan-100 cursor-pointer transition-all active:scale-95"
+                          className="bg-cyan-500 hover:bg-cyan-600 text-white text-[10px] font-black uppercase py-2 px-3 rounded-xl shadow-md shadow-cyan-100 cursor-pointer transition-all active:scale-95"
                         >
                           Approve
                         </button>
                       )}
+                      
                       <button 
                         onClick={() => onDelete(station.id)}
-                        className="bg-white hover:bg-rose-50 text-rose-500 border border-rose-100 text-[10px] font-black uppercase py-2 px-4 rounded-xl cursor-pointer transition-all active:scale-95"
+                        className="bg-white hover:bg-rose-50 text-rose-500 border border-rose-100 text-[10px] font-black uppercase py-2 px-3 rounded-xl cursor-pointer transition-all active:scale-95"
                       >
                         Delete
                       </button>

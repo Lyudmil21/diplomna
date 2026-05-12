@@ -116,7 +116,7 @@ export default function AddStationForm({ onCancel, onStationAdded }) {
 
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-slate-600 ml-1">Price per kWh</label>
-            <input className="border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-cyan-400 outline-none transition-all" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 0.60 BGN" />
+            <input className="border border-slate-200 rounded-xl p-2.5 focus:ring-2 focus:ring-cyan-400 outline-none transition-all" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. 0.60 EUR" />
           </div>
         </div>
 
