@@ -23,7 +23,7 @@ export default function StationList({ stations, isAdmin, onApprove, onDelete, on
               <th className="px-4 py-2">Network & Tech</th>
               <th className="px-4 py-2 text-center">Price / Distance</th>
               <th className="px-4 py-2">Status</th>
-              {isAdmin && <th className="px-4 py-2 text-right">Management</th>}
+              <th className="px-4 py-2 text-right">{isAdmin ? "Management" : "Actions"}</th>
             </tr>
           </thead>
           <tbody>
@@ -77,34 +77,44 @@ export default function StationList({ stations, isAdmin, onApprove, onDelete, on
                   )}
                 </td>
 
-                {isAdmin && (
-                  <td className="px-4 py-4 bg-white group-hover:bg-slate-50 rounded-r-2xl border-y border-r border-slate-50 text-right transition-colors">
-                    <div className="flex justify-end gap-2 items-center">
+                {/* ✨ UPDATED: Cell handles both user types flawlessly */}
+                <td className="px-4 py-4 bg-white group-hover:bg-slate-50 rounded-r-2xl border-y border-r border-slate-50 text-right transition-colors">
+                  <div className="flex justify-end gap-2 items-center">
+                    {isAdmin ? (
+                      <>
+                        <button 
+                          onClick={() => onEdit(station)}
+                          className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase py-2 px-3 rounded-xl transition-all active:scale-95 cursor-pointer"
+                        >
+                          Edit
+                        </button>
+
+                        {!station.is_approved && (
+                          <button 
+                            onClick={() => onApprove(station.id)}
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white text-[10px] font-black uppercase py-2 px-3 rounded-xl shadow-md shadow-cyan-100 cursor-pointer transition-all active:scale-95"
+                          >
+                          Approve
+                          </button>
+                        )}
+                        
+                        <button 
+                          onClick={() => onDelete(station.id)}
+                          className="bg-white hover:bg-rose-50 text-rose-500 border border-rose-100 text-[10px] font-black uppercase py-2 px-3 rounded-xl cursor-pointer transition-all active:scale-95"
+                        >
+                        Delete
+                        </button>
+                      </>
+                    ) : (
                       <button 
                         onClick={() => onEdit(station)}
-                        className="bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-black uppercase py-2 px-3 rounded-xl transition-all active:scale-95 cursor-pointer"
+                        className="bg-cyan-500 hover:bg-cyan-600 text-white text-[10px] font-black uppercase py-2 px-4 rounded-xl shadow-md shadow-cyan-100 cursor-pointer transition-all active:scale-95 flex items-center gap-1"
                       >
-                        Edit
+                        Review / Suggest
                       </button>
-
-                      {!station.is_approved && (
-                        <button 
-                          onClick={() => onApprove(station.id)}
-                          className="bg-cyan-500 hover:bg-cyan-600 text-white text-[10px] font-black uppercase py-2 px-3 rounded-xl shadow-md shadow-cyan-100 cursor-pointer transition-all active:scale-95"
-                        >
-                          Approve
-                        </button>
-                      )}
-                      
-                      <button 
-                        onClick={() => onDelete(station.id)}
-                        className="bg-white hover:bg-rose-50 text-rose-500 border border-rose-100 text-[10px] font-black uppercase py-2 px-3 rounded-xl cursor-pointer transition-all active:scale-95"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                )}
+                    )}
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

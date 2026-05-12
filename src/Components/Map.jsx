@@ -163,23 +163,30 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
 
                 <p className="text-[10px] text-slate-500 mb-3 italic">{station.address}</p>
 
-                <div className="mt-3 flex flex-col gap-2 pt-2 border-t border-slate-100">
+                <div className="mt-3 flex flex-col gap-1.5 pt-2 border-t border-slate-100">
                   <button onClick={() => handleGetDirections(station.latitude, station.longitude)}
                     className="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold shadow-sm flex items-center justify-center cursor-pointer">
                     Show Route on Map
                   </button>
+
+                  {!isAdmin && (
+                    <button onClick={() => onEdit(station)}
+                      className="w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 px-3 rounded-lg text-xs font-bold shadow-sm flex items-center justify-center cursor-pointer">
+                      Review & Suggest Edit
+                    </button>
+                  )}
                 </div>
 
                 {isAdmin && (
-                  <div className="mt-3 flex flex-col gap-1.5 pt-2 border-t border-slate-100">
+                  <div className="mt-2 flex flex-col gap-1.5 pt-1.5">
                     <button onClick={() => onEdit(station)}
                       className="w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 px-3 rounded-lg text-xs font-bold cursor-pointer">
-                        Edit Station Details
+                      Edit Station Details
                     </button>
                     {!station.is_approved && (
                       <button onClick={() => onApprove(station.id)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold shadow-sm cursor-pointer">
-                        Approve Station
+                      Approve Station
                       </button>
                     )}
                     <button onClick={() => onDelete(station.id)}

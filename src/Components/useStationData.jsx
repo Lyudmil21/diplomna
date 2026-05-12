@@ -13,7 +13,7 @@ export function useStationData(user, isAdmin, authLoading) {
       if (!error) setStations(data || []);
     };
     fetchStations();
-  }, [isAdmin, user]);
+  }, [isAdmin, user, authLoading]);
 
   const handleApprove = async (id) => {
     const { error } = await supabase.from("stations").update({ is_approved: true }).eq("id", id);
@@ -26,29 +26,84 @@ export function useStationData(user, isAdmin, authLoading) {
     if (!error) setStations(prev => prev.filter(s => s.id !== id));
   };
 
-  const handleAdminUpdate = async (stationId, updatedFields) => {
-  try {
-    const { error } = await supabase
-      .from("stations")
-      .update({
-        name: updatedFields.name,
-        operator: updatedFields.operator || null,
-        price: updatedFields.price ? parseFloat(updatedFields.price) : null,
-        power: updatedFields.power ? parseInt(updatedFields.power, 10) : null,
-        rating: updatedFields.rating ? parseFloat(updatedFields.rating) : 0.0
-      })
-      .eq("id", stationId);
+  const handleStationUpdateOrSuggest = async (stationId, updatePayload) => {
+    const { name, operator, price, power, newReview } = updatePayload;
 
-    if (error) throw error;
+    const parsedPrice = price ? parseFloat(price) : null;
+    const parsedPower = power ? parseInt(power, 10) : null;
 
-    setStations(prev => prev.map(s => s.id === stationId ? { ...s, ...updatedFields } : s));
-    return { success: true };
-  } catch (err) {
-    console.error(err);
-    alert("Failed updating database record.");
-    return { success: false };
-  }
-};
+    try {
+      if (isAdmin) {
+        const { error: stationError } = await supabase
+          .from("stations")
+          .update({
+            name,
+            operator: operator || null,
+            price: parsedPrice, 
+            power: parsedPower, 
+            updated_by: user?.id
+          })
+          .eq("id", stationId);
 
-  return { stations, setStations, handleApprove, handleDelete, handleAdminUpdate };
+        if (stationError) throw stationError;
+
+        setStations(prev => prev.map(s => s.id === stationId ? { 
+          ...s, name, operator, price: parsedPrice, power: parsedPower, updated_by: user?.id 
+        } : s));
+      } else {
+        const { error: suggestionError } = await supabase
+          .from("station_edits")
+          .insert({
+            station_id: stationId,
+            suggested_by: user?.id,
+            new_data: { name, operator, price: parsedPrice, power: parsedPower } 
+          });
+
+        if (suggestionError) throw suggestionError;
+        alert("Changes submitted for approval by administration!");
+      }
+
+      if (newReview && newReview.rating > 0) {
+        const { error: reviewError } = await supabase
+          .from("reviews")
+          .insert({
+            station_id: stationId,
+            user_id: user?.id,
+            rating: newReview.rating,
+            comment: newReview.comment || null
+          });
+
+        if (reviewError) throw reviewError;
+
+        const { data: reviewsData } = await supabase
+          .from("reviews")
+          .select("rating")
+          .eq("station_id", stationId);
+
+        if (reviewsData && reviewsData.length > 0) {
+          const totalScore = reviewsData.reduce((sum, r) => sum + r.rating, 0);
+          const averageRating = parseFloat((totalScore / reviewsData.length).toFixed(1));
+
+          await supabase
+            .from("stations")
+            .update({ rating: averageRating })
+            .eq("id", stationId);
+
+          setStations(prev => prev.map(s => s.id === stationId ? { 
+            ...s, 
+            ...(isAdmin ? { name, operator, price: parsedPrice, power: parsedPower } : {}), 
+            rating: averageRating 
+          } : s));
+        }
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error("Transaction processing failure:", err);
+      alert("An error occurred while saving your data.");
+      return { success: false };
+    }
+  };
+
+  return { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest };
 }

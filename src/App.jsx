@@ -17,7 +17,7 @@ function App() {
   const [editingStation, setEditingStation] = useState(null); 
   const [userLocation, setUserLocation] = useState(null);
 
-  const { stations, setStations, handleApprove, handleDelete, handleAdminUpdate } = useStationData(user, isAdmin, loading);
+  const { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest } = useStationData(user, isAdmin, loading);
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -78,7 +78,8 @@ function App() {
         <EditStationModal 
           station={editingStation} 
           onClose={() => setEditingStation(null)} 
-          onUpdate={handleAdminUpdate} 
+          onUpdate={handleStationUpdateOrSuggest} 
+          isAdmin={isAdmin}
         />
       )}
     </div>
