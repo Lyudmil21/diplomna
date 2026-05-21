@@ -5,6 +5,7 @@ import AddStationForm from "./Components/AddStationForm.jsx";
 import Map from "./Components/Map.jsx";
 import StationList from "./Components/StationList.jsx";
 import EditStationModal from "./Components/EditStationModal.jsx"; 
+import AdminEditsDashboard from "./Admin/AdminEdits.jsx"; 
 import { useAuth } from "./Contexts/AuthContext.jsx";
 import { useStationFilters } from "./Components/useStationFilters.jsx";
 import { useStationData } from "./Components/useStationData.jsx"; 
@@ -15,7 +16,6 @@ function App() {
   const [addingStation, setAddingStation] = useState(false);
   const [editingStation, setEditingStation] = useState(null); 
   const [userLocation, setUserLocation] = useState(null);
-
   const { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest } = useStationData(user, isAdmin, loading);
 
   useEffect(() => {
@@ -38,6 +38,10 @@ function App() {
 
   const { filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy } = useStationFilters(stations, userLocation);
 
+  const refreshStationList = (updatedStationId, updatedFields) => {
+    setStations(prev => prev.map(s => s.id === updatedStationId ? { ...s, ...updatedFields } : s));
+  };
+
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
       <div className="w-12 h-12 border-4 border-cyan-100 border-t-cyan-500 rounded-full animate-spin"></div>
@@ -54,6 +58,8 @@ function App() {
         setFilters={setFilters}
         sortBy={sortBy}
         setSortBy={setSortBy}
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
       />
 
       {!user ? (
@@ -62,32 +68,52 @@ function App() {
         </div>
       ) : (
         <div className="animate-in fade-in">
+          
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 my-8 bg-slate-50 p-2 rounded-3xl w-fit mx-auto border border-slate-100 shadow-sm">
             <div className="flex bg-slate-200/50 p-1 rounded-2xl">
               {["map", "list"].map((tab) => (
-                <button key={tab} onClick={() => { setActiveTab(tab); setAddingStation(false); }}
-                  className={`px-8 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${activeTab === tab && !addingStation ? "bg-white text-cyan-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>
+                <button 
+                  key={tab} 
+                  onClick={() => { setActiveTab(tab); setAddingStation(false); }}
+                  className={`px-8 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${activeTab === tab && !addingStation ? "bg-white text-cyan-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                >
                   {tab}
                 </button>
               ))}
+
+              {isAdmin && (
+                <button 
+                  onClick={() => { setActiveTab("admin-edits"); setAddingStation(false); }}
+                  className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === "admin-edits" && !addingStation ? "bg-amber-500 text-white shadow-sm" : "text-amber-600 hover:bg-amber-50/50"}`}
+                >
+                  Edits
+                </button>
+              )}
             </div>
+            
             <div className="hidden sm:block w-px h-6 bg-slate-200 mx-2"></div>
-            <button onClick={() => setAddingStation(true)} 
-              className={`px-8 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${addingStation ? "bg-slate-800 text-white" : "bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-100"}`}>
+            
+            <button 
+              onClick={() => setAddingStation(true)} 
+              className={`px-8 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${addingStation ? "bg-slate-800 text-white" : "bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-100"}`}
+            >
               Add Station
             </button>
           </div>
 
           <main>
             {addingStation ? (
-              <AddStationForm onCancel={() => setAddingStation(false)} 
-                onStationAdded={(s) => { setStations(prev => [s, ...prev]); setAddingStation(false); setActiveTab("list"); }} />
+              <AddStationForm 
+                onCancel={() => setAddingStation(false)} 
+                onStationAdded={(s) => { setStations(prev => [s, ...prev]); setAddingStation(false); setActiveTab("list"); }} 
+              />
             ) : activeTab === "map" ? (
               <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} userLocation={userLocation}/>
-            ) : (
+            ) : activeTab === "list" ? (
               <StationList stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
-            )
-            }
+            ) : (
+              <AdminEditsDashboard onStationModifiedInView={refreshStationList} />
+            )}
           </main>
         </div>
       )}

@@ -9,7 +9,6 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
     power: station.power || "",
   });
   
-  // Review Engine Local States
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -18,7 +17,6 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
   const [existingReviews, setExistingReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
 
-  // ✨ NEW: Fetch reviews on mount
   useEffect(() => {
     const fetchReviews = async () => {
       setLoadingReviews(true);
@@ -74,7 +72,12 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
       <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl border border-slate-100 overflow-hidden transform scale-100 transition-all animate-in zoom-in-95 duration-200">
         
         <div className="p-6 bg-slate-900 text-white relative flex flex-col items-center text-center">
-          <h3 className="text-xl font-black tracking-tight w-full px-6">Station Hub</h3>
+          <h3 className="text-xl font-black tracking-tight w-full px-6 flex items-center justify-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 text-cyan-400">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a9.015 9.015 0 0 1 8.716 6.747M12 3a9.015 9.015 0 0 0-8.716 6.747M12 9h.008v.008H12V9Zm6 3h.008v.008H18V12Zm-12 0h.008v.008H6V12Zm6 3h.008v.008H12V15Z" />
+            </svg>
+            Station Hub
+          </h3>
           <p className="text-slate-400 text-xs mt-0.5 w-full px-6">View details, submit suggestions, or leave a review</p>
           
           <button 
@@ -106,7 +109,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Price (lv/kWh)</label>
+                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Price (euro/kWh)</label>
                 <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} placeholder="Free"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 font-bold text-slate-800 text-sm" />
               </div>
@@ -120,7 +123,10 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
             <div className="w-full h-px bg-slate-100 my-1"></div>
 
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 text-center">
+              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 text-center items-center justify-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-amber-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.173-.434.768-.434.94 0l3.102 6.312 6.965 1.013c.493.071.693.686.337 1.036l-5.04 4.912 1.19 6.936c.088.514-.452.905-.902.663L12 19.184l-6.213 3.29c-.45.242-.99-.149-.902-.663l1.19-6.936-5.04-4.912c-.356-.35-.155-.965.337-1.036l6.965-1.013 3.102-6.312Z" />
+                </svg>
                 Leave your Review
               </label>
               
@@ -134,9 +140,20 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                     onMouseLeave={() => setHoverRating(0)}
                     className="p-1 transition-transform active:scale-95 cursor-pointer text-2xl focus:outline-none"
                   >
-                    <span className={`transition-colors duration-150 ${(hoverRating || rating) >= star ? "text-amber-400" : "text-slate-200"}`}>
-                      ★
-                    </span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className={`w-7 h-7 transition-colors duration-150 ${
+                        (hoverRating || rating) >= star 
+                          ? "fill-amber-400 text-amber-400" 
+                          : "fill-none text-slate-300 stroke-[2.5]"
+                      }`}
+                      stroke="currentColor"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    >
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                    </svg>
                   </button>
                 ))}
               </div>
@@ -167,7 +184,10 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
           <div className="w-full h-px bg-slate-100"></div>
 
           <div>
-            <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+              </svg>
               Community Reviews ({existingReviews.length})
             </h4>
 
@@ -180,7 +200,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                 {existingReviews.map((rev) => (
                   <div key={rev.id} className="p-3 bg-slate-50/50 rounded-xl border border-slate-100 flex flex-col gap-1">
                     <div className="flex items-center justify-between">
-                      <div className="text-amber-400 text-sm tracking-tight">
+                      <div className="text-amber-400 text-xs tracking-tight font-sans">
                         {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
                       </div>
                       <span className="text-[10px] text-slate-400 font-bold">
