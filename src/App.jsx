@@ -3,7 +3,6 @@ import Header from "./Components/Header.jsx";
 import AuthForm from "./Components/AuthForm.jsx";
 import AddStationForm from "./Components/AddStationForm.jsx";
 import Map from "./Components/Map.jsx";
-import FilterBar from "./Components/FilterBar.jsx"; 
 import StationList from "./Components/StationList.jsx";
 import EditStationModal from "./Components/EditStationModal.jsx"; 
 import { useAuth } from "./Contexts/AuthContext.jsx";
@@ -37,14 +36,21 @@ function App() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans relative">
-      <Header />
+      <Header 
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        filters={filters}
+        setFilters={setFilters}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+      />
 
-      {!user ? <div className="mt-12 animate-in fade-in slide-in-from-bottom-4"><AuthForm /></div> : (
+      {!user ? (
+        <div className="mt-12 animate-in fade-in slide-in-from-bottom-4">
+          <AuthForm />
+        </div>
+      ) : (
         <div className="animate-in fade-in">
-          {!addingStation && (
-            <FilterBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} filters={filters} setFilters={setFilters} sortBy={sortBy} setSortBy={setSortBy} />
-          )}
-
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 my-8 bg-slate-50 p-2 rounded-3xl w-fit mx-auto border border-slate-100 shadow-sm">
             <div className="flex bg-slate-200/50 p-1 rounded-2xl">
               {["map", "list"].map((tab) => (
@@ -69,7 +75,8 @@ function App() {
               <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
             ) : (
               <StationList stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
-            )}
+            )
+            }
           </main>
         </div>
       )}
