@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
 const userLocationIcon = L.divIcon({
   html: `
     <div class="relative flex items-center justify-center">
-      <span class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-slate-400 opacity-40"></span>
+      <span class="animate-ping absolute inline-flex h-8 w-8 rounded-full bg-cyan-400 opacity-40"></span>
       <div class="bg-slate-900 border-2 border-white p-2 rounded-full shadow-xl text-white flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -28,6 +28,16 @@ const userLocationIcon = L.divIcon({
   iconSize: [36, 36],
   iconAnchor: [18, 18]
 });
+
+function RecenterMap({ coords }) {
+  const map = useMap();
+  useEffect(() => {
+    if (coords) {
+      map.flyTo([coords.lat, coords.lng], 13, { animate: true, duration: 1.5 });
+    }
+  }, [coords, map]);
+  return null;
+}
 
 function RoutingMachine({ userCoords, destCoords }) {
   const map = useMap();
@@ -69,24 +79,30 @@ function RoutingMachine({ userCoords, destCoords }) {
 
   return null;
 }
-
-export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdit }) {
+export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdit, userLocation }) {
   const [activeRoute, setActiveRoute] = useState(null);
 
   const handleGetDirections = (stationLat, stationLng) => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
+    if (userLocation) {
+      setActiveRoute({
+        user: [userLocation.lat, userLocation.lng],
+        dest: [stationLat, stationLng]
+      });
+    } else {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setActiveRoute({
+            user: [position.coords.latitude, position.coords.longitude],
+            dest: [stationLat, stationLng]
+          });
+        },
+        () => alert("Unable to retrieve location.")
+      );
     }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setActiveRoute({
-          user: [position.coords.latitude, position.coords.longitude],
-          dest: [stationLat, stationLng]
-        });
-      },
-      () => alert("Unable to retrieve location.")
-    );
   };
 
   return (
@@ -110,10 +126,12 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
           attribution='© <a href="http://osm.org/copyright">OpenStreetMap</a>'
         />
 
+        <RecenterMap coords={userLocation} />
+
         {activeRoute && <RoutingMachine userCoords={activeRoute.user} destCoords={activeRoute.dest} />}
 
-        {activeRoute && (
-          <Marker position={activeRoute.user} icon={userLocationIcon}>
+        {userLocation && (
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
             <Popup><span className="font-bold text-xs text-slate-800">You are here 📍</span></Popup>
           </Marker>
         )}
@@ -186,7 +204,7 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
                     {!station.is_approved && (
                       <button onClick={() => onApprove(station.id)}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 px-3 rounded-lg text-xs font-bold shadow-sm cursor-pointer">
-                      Approve Station
+                        Approve Station
                       </button>
                     )}
                     <button onClick={() => onDelete(station.id)}

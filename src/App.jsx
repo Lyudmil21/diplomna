@@ -19,11 +19,22 @@ function App() {
   const { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest } = useStationData(user, isAdmin, loading);
 
   useEffect(() => {
+    if (!user) return; 
+
     navigator.geolocation.getCurrentPosition(
-      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => console.warn("Location denied"), { enableHighAccuracy: true }
+      (pos) => {
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (error) => {
+        console.warn("Location access denied or timed out:", error.message);
+      },
+      { 
+        enableHighAccuracy: true,
+        timeout: 10000, 
+        maximumAge: 0  
+      }
     );
-  }, []);
+  }, [user]);
 
   const { filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy } = useStationFilters(stations, userLocation);
 
@@ -72,7 +83,7 @@ function App() {
               <AddStationForm onCancel={() => setAddingStation(false)} 
                 onStationAdded={(s) => { setStations(prev => [s, ...prev]); setAddingStation(false); setActiveTab("list"); }} />
             ) : activeTab === "map" ? (
-              <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
+              <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} userLocation={userLocation}/>
             ) : (
               <StationList stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
             )
