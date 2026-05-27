@@ -31,43 +31,31 @@ export default function Header({ searchQuery, setSearchQuery, filters, setFilter
           </h1>
         </div>
         
-        {user ? (
-          <div className="flex items-center gap-5 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 w-full sm:w-auto justify-between sm:justify-start">
-            <div className="flex items-center gap-2.5">
-              <div className="bg-slate-200 text-slate-600 p-1.5 rounded-lg shrink-0 hidden sm:block">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                </svg>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Logged in as</span>
-                <span className="text-sm font-bold text-slate-800 italic">
-                  {username || user.email?.split('@')[0]}
-                </span>
-              </div>
+        <div className="flex items-center gap-5 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-slate-200 text-slate-600 p-1.5 rounded-lg shrink-0 hidden sm:block">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+              </svg>
             </div>
-            
-            <button 
-              onClick={logout}
-              className="bg-white hover:bg-rose-50 text-rose-500 border border-rose-100 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all hover:shadow-sm active:scale-95 cursor-pointer flex items-center gap-1.5"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
-              </svg>
-              Logout
-            </button>
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Logged in as</span>
+              <span className="text-sm font-bold text-slate-800 italic">
+                {username || user?.email?.split('@')[0]}
+              </span>
+            </div>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-xl border border-amber-100 w-full sm:w-auto justify-center">
-            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
-            <span className="text-xs text-amber-700 font-bold uppercase tracking-tight flex items-center gap-1.5">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-amber-500">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-              </svg>
-              Guest Mode
-            </span>
-          </div>
-        )}
+          
+          <button 
+            onClick={logout}
+            className="bg-white hover:bg-rose-50 text-rose-500 border border-rose-100 px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all hover:shadow-sm active:scale-95 cursor-pointer flex items-center gap-1.5"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+            </svg>
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="h-px w-full bg-slate-100/80"></div>

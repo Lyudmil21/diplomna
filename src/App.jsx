@@ -19,7 +19,7 @@ function App() {
   const { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest } = useStationData(user, isAdmin, loading);
 
   useEffect(() => {
-    if (!user) return; 
+    if (!user || userLocation) return; 
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -34,7 +34,7 @@ function App() {
         maximumAge: 0  
       }
     );
-  }, [user]);
+  }, [user, userLocation]);
 
   const { filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy } = useStationFilters(stations, userLocation);
 
@@ -51,23 +51,23 @@ function App() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 font-sans relative">
-      <Header 
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filters={filters}
-        setFilters={setFilters}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
-      />
-
       {!user ? (
         <div className="mt-12 animate-in fade-in slide-in-from-bottom-4">
           <AuthForm />
         </div>
       ) : (
         <div className="animate-in fade-in">
+          
+          <Header 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filters={filters}
+            setFilters={setFilters}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab}
+          />
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 my-8 bg-slate-50 p-2 rounded-3xl w-fit mx-auto border border-slate-100 shadow-sm">
             <div className="flex bg-slate-200/50 p-1 rounded-2xl">
