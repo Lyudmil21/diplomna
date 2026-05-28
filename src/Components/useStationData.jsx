@@ -7,7 +7,15 @@ export function useStationData(user, isAdmin, authLoading) {
   useEffect(() => {
     if (authLoading) return;
     const fetchStations = async () => {
-      let query = supabase.from("stations").select("*");
+      let query = supabase
+        .from("stations")
+        .select(`
+          *,
+          station_photos (
+            image_url
+          )
+        `);
+        
       if (!isAdmin) query = query.eq("is_approved", true);
       const { data, error } = await query;
       if (!error) setStations(data || []);

@@ -17,32 +17,103 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
   const [existingReviews, setExistingReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
 
+  const [stationPhotos, setStationPhotos] = useState([]);
+  const [loadingPhotos, setLoadingPhotos] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
+
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchReviewsAndPhotos = async () => {
       setLoadingReviews(true);
+      setLoadingPhotos(true);
+      
       try {
-        const { data, error } = await supabase
+        const { data: reviewsData, error: reviewsError } = await supabase
           .from("reviews")
           .select("id, rating, comment, created_at, user_id")
           .eq("station_id", station.id)
           .order("created_at", { ascending: false });
 
-        if (!error) {
-          setExistingReviews(data || []);
+        if (!reviewsError) {
+          setExistingReviews(reviewsData || []);
+        }
+
+        const { data: photosData, error: photosError } = await supabase
+          .from("station_photos")
+          .select("id, image_url, created_at")
+          .eq("station_id", station.id)
+          .order("created_at", { ascending: false });
+
+        if (!photosError) {
+          setStationPhotos(photosData || []);
         }
       } catch (err) {
-        console.error("Error fetching reviews:", err);
+        console.error("Error fetching modal dashboard data:", err);
       } finally {
         setLoadingReviews(false);
+        setLoadingPhotos(false);
       }
     };
 
-    fetchReviews();
+    fetchReviewsAndPhotos();
   }, [station.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoUpload = async (e) => {
+    e.preventDefault();
+    if (!selectedFile) return;
+
+    try {
+      setUploading(true);
+      setUploadMessage("Uploading image...");
+
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${station.id}/${Date.now()}.${fileExt}`;
+      const filePath = `public/${fileName}`;
+
+      const { error: storageError } = await supabase.storage
+        .from("station-photos")
+        .upload(filePath, selectedFile);
+
+      if (storageError) throw storageError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("station-photos")
+        .getPublicUrl(filePath);
+
+      const { data: newPhotoRow, error: dbError } = await supabase
+        .from("station_photos")
+        .insert([
+          {
+            station_id: station.id,
+            image_url: publicUrl
+          }
+        ])
+        .select();
+
+      if (dbError) throw dbError;
+
+      setUploadMessage("✅ Photo uploaded successfully!");
+      setSelectedFile(null);
+      
+      if (newPhotoRow && newPhotoRow[0]) {
+        setStationPhotos((prev) => [newPhotoRow[0], ...prev]);
+      }
+      
+      const inputElement = document.getElementById("station-photo-uploader");
+      if (inputElement) inputElement.value = "";
+
+    } catch (error) {
+      console.error("Image upload exception thrown:", error.message);
+      setUploadMessage(`❌ Upload failed: ${error.message}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -94,6 +165,70 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
 
         <div className="max-h-[75vh] overflow-y-auto p-6 flex flex-col gap-5">
           
+          <div>
+            <h4 className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5A1.5 1.5 0 0 0 22 18V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+              </svg>
+              Station Photos ({stationPhotos.length})
+            </h4>
+
+            {loadingPhotos ? (
+              <p className="text-xs font-bold text-slate-400 animate-pulse py-1">Loading gallery layout...</p>
+            ) : stationPhotos.length === 0 ? (
+              <div className="text-center py-4 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+                <p className="text-xs font-medium text-slate-400 italic">No photos shared for this charger yet.</p>
+              </div>
+            ) : (
+              <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin max-w-full snap-x">
+                {stationPhotos.map((photo) => (
+                  <div key={photo.id} className="relative shrink-0 snap-center rounded-xl overflow-hidden border border-slate-100 group shadow-sm bg-slate-50">
+                    <img 
+                      src={photo.image_url} 
+                      alt="EV Station Community" 
+                      className="w-24 h-24 object-cover hover:scale-105 transition-transform duration-200"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-slate-50 border border-slate-100 p-3.5 rounded-2xl">
+            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">
+              Upload New Station Photo
+            </label>
+            
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <input 
+                id="station-photo-uploader"
+                type="file" 
+                accept="image/*"
+                onChange={(e) => setSelectedFile(e.target.files[0] || null)}
+                className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:bg-cyan-50 file:text-cyan-700 hover:file:bg-cyan-100 cursor-pointer text-slate-500 w-full"
+              />
+              
+              {selectedFile && (
+                <button
+                  type="button"
+                  disabled={uploading}
+                  onClick={handlePhotoUpload}
+                  className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-300 text-white font-black text-[10px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-md shadow-cyan-100 shrink-0 cursor-pointer flex items-center justify-center"
+                >
+                  {uploading ? "Uploading..." : "Upload"}
+                </button>
+              )}
+            </div>
+
+            {uploadMessage && (
+              <p className="text-[10px] font-bold mt-1.5 text-slate-500 italic">
+                {uploadMessage}
+              </p>
+            )}
+          </div>
+
+          <div className="w-full h-px bg-slate-100"></div>
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Station Name</label>
