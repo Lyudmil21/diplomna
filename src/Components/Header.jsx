@@ -110,15 +110,16 @@ export default function Header({ searchQuery, setSearchQuery, filters, setFilter
 
       {showAdvanced && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pt-6 border-t border-slate-100 animate-in fade-in slide-in-from-top-2">
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3 text-cyan-500">
+          
+          <div className="flex flex-col">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2.5 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-cyan-500">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
               </svg>
               Connector
             </label>
             <select 
-              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none"
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none h-10.5"
               value={filters.connector}
               onChange={(e) => setFilters({...filters, connector: e.target.value})}
             >
@@ -129,15 +130,15 @@ export default function Header({ searchQuery, setSearchQuery, filters, setFilter
             </select>
           </div>
 
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3 text-cyan-500">
+          <div className="flex flex-col">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2.5 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-cyan-500">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
               </svg>
-              Min Power (kW)
+              Min Power
             </label>
             <select 
-              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none"
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none h-10.5"
               value={filters.minPower}
               onChange={(e) => setFilters({...filters, minPower: Number(e.target.value)})}
             >
@@ -148,15 +149,15 @@ export default function Header({ searchQuery, setSearchQuery, filters, setFilter
             </select>
           </div>
 
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3 text-amber-500">
+          <div className="flex flex-col">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2.5 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-amber-500">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.173-.434.768-.434.94 0l3.102 6.312 6.965 1.013c.493.071.693.686.337 1.036l-5.04 4.912 1.19 6.936c.088.514-.452.905-.902.663L12 19.184l-6.213 3.29c-.45.242-.99-.149-.902-.663l1.19-6.936-5.04-4.912c-.356-.35-.155-.965.337-1.036l6.965-1.013 3.102-6.312z" />
               </svg>
               Min Rating
             </label>
             <select 
-              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none"
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none h-10.5"
               value={filters.minRating || 0}
               onChange={(e) => setFilters({...filters, minRating: Number(e.target.value)})}
             >
@@ -167,30 +168,32 @@ export default function Header({ searchQuery, setSearchQuery, filters, setFilter
             </select>
           </div>
 
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3 text-emerald-500">
+          <div className="flex flex-col">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2.5 ml-1 whitespace-nowrap">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-emerald-500">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Max Price: <span className="text-cyan-500 font-black ml-0.5">{filters.maxPrice} euro/kWh</span>
+              <span>Max Price: <span className="text-cyan-500 font-black">{filters.maxPrice} €</span></span>
             </label>
-            <input 
-              type="range" min="0" max="2" step="0.1" 
-              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-cyan-500 mt-3"
-              value={filters.maxPrice}
-              onChange={(e) => setFilters({...filters, maxPrice: parseFloat(e.target.value)})}
-            />
+            <div className="flex items-center h-10.5">
+              <input 
+                type="range" min="0" max="2" step="0.1" 
+                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                value={filters.maxPrice}
+                onChange={(e) => setFilters({...filters, maxPrice: parseFloat(e.target.value)})}
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1 items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3 text-cyan-500">
+          <div className="flex flex-col">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2.5 ml-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-cyan-500">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a9.015 9.015 0 0 1 8.716 6.747M12 3a9.015 9.015 0 0 0-8.716 6.747M12 9h.008v.008H12V9zm6 3h.008v.008H18V12zM6 12h.008v.008H6V12zm6 3h.008v.008H12V15z" />
               </svg>
               Network
             </label>
             <select 
-              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none"
+              className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-cyan-400 outline-none h-10.5"
               value={filters.operator}
               onChange={(e) => setFilters({...filters, operator: e.target.value})}
             >

@@ -49,7 +49,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
           setStationPhotos(photosData || []);
         }
       } catch (err) {
-        console.error("Error fetching modal dashboard data:", err);
+        console.error("Error fetching modal data:", err);
       } finally {
         setLoadingReviews(false);
         setLoadingPhotos(false);
@@ -109,10 +109,40 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
       if (inputElement) inputElement.value = "";
 
     } catch (error) {
-      console.error("Image upload exception thrown:", error.message);
-      setUploadMessage(`❌ Upload failed: ${error.message}`);
+      console.error("Image upload error:", error.message);
+      setUploadMessage(`Upload failed: ${error.message}`);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId, imageUrl) => {
+    if (!window.confirm("Are you sure you want to delete this station photo?")) return;
+
+    try {
+      const pathParts = imageUrl.split('/storage/v1/object/public/station-photos/');
+      if (pathParts.length < 2) throw new Error("Could not parse file path from storage URL.");
+      const storageFilePath = pathParts[1];
+
+      const { error: storageDeleteError } = await supabase.storage
+        .from("station-photos")
+        .remove([storageFilePath]);
+
+      if (storageDeleteError) throw storageDeleteError;
+
+      const { error: dbDeleteError } = await supabase
+        .from("station_photos")
+        .delete()
+        .eq("id", photoId);
+
+      if (dbDeleteError) throw dbDeleteError;
+
+      setStationPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
+      alert("✅ Photo deleted successfully.");
+
+    } catch (error) {
+      console.error("Error removing station photo:", error.message);
+      alert(`❌ Failed to delete photo: ${error.message}`);
     }
   };
 
@@ -145,7 +175,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
         <div className="p-6 bg-slate-900 text-white relative flex flex-col items-center text-center">
           <h3 className="text-xl font-black tracking-tight w-full px-6 flex items-center justify-center gap-1.5">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 text-cyan-400">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9s2.015-9 4.5-9m0 0a9.015 9.015 0 0 1 8.716 6.747M12 3a9.015 9.015 0 0 0-8.716 6.747M12 9h.008v.008H12V9Zm6 3h.008v.008H18V12Zm-12 0h.008v.008H6V12Zm6 3h.008v.008H12V15Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
             Station Hub
           </h3>
@@ -182,12 +212,25 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
             ) : (
               <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin max-w-full snap-x">
                 {stationPhotos.map((photo) => (
-                  <div key={photo.id} className="relative shrink-0 snap-center rounded-xl overflow-hidden border border-slate-100 group shadow-sm bg-slate-50">
+                  <div key={photo.id} className="relative shrink-0 snap-center rounded-xl overflow-hidden border border-slate-100 group shadow-sm bg-slate-50 w-24 h-24">
                     <img 
                       src={photo.image_url} 
                       alt="EV Station Community" 
-                      className="w-24 h-24 object-cover hover:scale-105 transition-transform duration-200"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                     />
+                    
+                    {isAdmin && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePhoto(photo.id, photo.image_url)}
+                        className="absolute top-1 right-1 bg-rose-500/90 hover:bg-rose-600 text-white p-1 rounded-lg transition-colors cursor-pointer opacity-100 sm:opacity-0 sm:group-hover:opacity-100 shadow-md"
+                        title="Delete photo as Admin"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -195,7 +238,10 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
           </div>
 
           <div className="bg-slate-50 border border-slate-100 p-3.5 rounded-2xl">
-            <label className="block text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">
+            <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-slate-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
               Upload New Station Photo
             </label>
             
@@ -213,8 +259,11 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                   type="button"
                   disabled={uploading}
                   onClick={handlePhotoUpload}
-                  className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-300 text-white font-black text-[10px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-md shadow-cyan-100 shrink-0 cursor-pointer flex items-center justify-center"
+                  className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-slate-300 text-white font-black text-[10px] uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-md shadow-cyan-100 shrink-0 cursor-pointer flex items-center justify-center gap-1"
                 >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+                  </svg>
                   {uploading ? "Uploading..." : "Upload"}
                 </button>
               )}
@@ -258,9 +307,9 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
             <div className="w-full h-px bg-slate-100 my-1"></div>
 
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 text-center items-center justify-center gap-1">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-amber-500">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499c.173-.434.768-.434.94 0l3.102 6.312 6.965 1.013c.493.071.693.686.337 1.036l-5.04 4.912 1.19 6.936c.088.514-.452.905-.902.663L12 19.184l-6.213 3.29c-.45.242-.99-.149-.902-.663l1.19-6.936-5.04-4.912c-.356-.35-.155-.965.337-1.036l6.965-1.013 3.102-6.312Z" />
+              <label className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2 text-center flex items-center justify-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-cyan-500">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379L12 21l2.62-2.636c1.152-.086 2.294-.213 3.423-.379 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                 </svg>
                 Leave your Review
               </label>
@@ -310,8 +359,11 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                 Cancel
               </button>
               <button type="submit" disabled={isSaving}
-                className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs uppercase py-3 rounded-xl tracking-wider shadow-md shadow-cyan-100 transition-all cursor-pointer disabled:opacity-50">
-                {isSaving ? "Saving..." : isAdmin ? "Publish Changes" : "Submit Suggestion & Review"}
+                className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs uppercase py-3 rounded-xl tracking-wider shadow-md shadow-cyan-100 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                {isSaving ? "Saving..." : isAdmin ? "Publish Changes" : "Submit Suggestion"}
               </button>
             </div>
           </form>
