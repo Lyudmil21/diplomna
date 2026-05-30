@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../Services/supabaseClient.jsx";
 
+
+const adminTranslations = {
+  en: {
+    
+    
+  }, 
+  
+  bg: {
+
+  }
+}
+
 export default function AdminEditsDashboard() {
   const [edits, setEdits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState("en");
+  const t = adminTranslations[lang || "en"];
 
   useEffect(() => {
     fetchPendingEdits();

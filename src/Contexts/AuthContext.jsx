@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(true); 
+    const [lang, setLang] = useState("en");
     const lastCheckedUserId = useRef(null);
     const isFullyLoaded = useRef(false); 
 
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-      <AuthContext.Provider value={{ user, setUser, isAdmin, username, loading }}>
+      <AuthContext.Provider value={{ user, setUser, isAdmin, username, loading, lang, setLang }}>
         {!loading && children}
       </AuthContext.Provider>
     );

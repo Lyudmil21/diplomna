@@ -1,7 +1,83 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../Services/supabaseClient.jsx"; 
+import { useAuth } from "../Contexts/AuthContext.jsx"; 
+
+const modalTranslations = {
+  en: {
+    hubTitle: "Station Hub",
+    hubSubtitle: "View details, submit suggestions, or leave a review",
+    sectionPhotos: "Station Photos",
+    loadingLayout: "Loading gallery layout...",
+    noPhotos: "No photos shared for this charger yet.",
+    deleteConfirm: "Are you sure you want to delete this station photo?",
+    deleteSuccess: "Photo deleted successfully.",
+    deleteFail: "Failed to delete photo:",
+    uploadLabel: "Upload New Station Photo",
+    uploadingMsg: "Uploading image...",
+    uploadSuccess: "Photo uploaded successfully!",
+    uploadFail: "Upload failed:",
+    btnUploading: "Uploading...",
+    btnUpload: "Upload",
+    labelName: "Station Name",
+    labelOperator: "Network Operator",
+    placeholderOperator: "Independent",
+    labelPrice: "Price (euro/kWh)",
+    placeholderFree: "Free",
+    labelPower: "Power Output (kW)",
+    placeholderNA: "N/A",
+    reviewLabel: "Leave your Review",
+    reviewPlaceholder: "Share your charging experience at this location...",
+    btnCancel: "Cancel",
+    btnSaving: "Saving...",
+    btnPublish: "Publish Changes",
+    btnSuggest: "Submit Suggestion",
+    sectionReviews: "Community Reviews",
+    loadingReviews: "Loading reviews...",
+    noReviews: "No reviews left for this station yet.",
+    emptyReviewMsg: "User rated this station without leaving a comment.",
+    nameRequired: "Station name is required."
+  },
+
+  bg: {
+    hubTitle: "Център за станции",
+    hubSubtitle: "Преглед на подробности, изпращане на предложения или отзив",
+    sectionPhotos: "Снимки на станцията",
+    loadingLayout: "Зареждане на галерията...",
+    noPhotos: "Все още няма качени снимки за тази станция.",
+    deleteConfirm: "Наистина ли искате да изтриете тази снимка?",
+    deleteSuccess: "Снимката е изтрита успешно.",
+    deleteFail: "Неуспешно изтриване на снимката:",
+    uploadLabel: "Качи нова снимка на станцията",
+    uploadingMsg: "Качване на изображението...",
+    uploadSuccess: "Снимката е качена успешно!",
+    uploadFail: "Качването се провали:",
+    btnUploading: "Качване...",
+    btnUpload: "Качи",
+    labelName: "Име на станцията",
+    labelOperator: "Зарядна мрежа / Оператор",
+    placeholderOperator: "Независим",
+    labelPrice: "Цена (евро/kWh)",
+    placeholderFree: "Безплатно",
+    labelPower: "Мощност (kW)",
+    placeholderNA: "N/A",
+    reviewLabel: "Оставете вашия отзив",
+    reviewPlaceholder: "Споделете опита си с зареждането на тази локация...",
+    btnCancel: "Отказ",
+    btnSaving: "Запазване...",
+    btnPublish: "Публикувай",
+    btnSuggest: "Изпрати предложение",
+    sectionReviews: "Потребителски отзиви",
+    loadingReviews: "Зареждане на отзиви...",
+    noReviews: "Все още няма отзиви за тази станция.",
+    emptyReviewMsg: "Потребителят е оценил станцията без да остави коментар.",
+    nameRequired: "Името на станцията е задължително."
+  }
+};
 
 export default function EditStationModal({ station, onClose, onUpdate, isAdmin }) {
+  const { user, lang } = useAuth();
+  const t = modalTranslations[lang || "en"];
+
   const [formData, setFormData] = useState({
     name: station.name || "",
     operator: station.operator || "",
@@ -13,10 +89,8 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  
   const [existingReviews, setExistingReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
-
   const [stationPhotos, setStationPhotos] = useState([]);
   const [loadingPhotos, setLoadingPhotos] = useState(true);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -70,7 +144,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
 
     try {
       setUploading(true);
-      setUploadMessage("Uploading image...");
+      setUploadMessage(t.uploadingMsg);
 
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${station.id}/${Date.now()}.${fileExt}`;
@@ -98,7 +172,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
 
       if (dbError) throw dbError;
 
-      setUploadMessage("✅ Photo uploaded successfully!");
+      setUploadMessage(t.uploadSuccess);
       setSelectedFile(null);
       
       if (newPhotoRow && newPhotoRow[0]) {
@@ -110,14 +184,14 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
 
     } catch (error) {
       console.error("Image upload error:", error.message);
-      setUploadMessage(`Upload failed: ${error.message}`);
+      setUploadMessage(`${t.uploadFail} ${error.message}`);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeletePhoto = async (photoId, imageUrl) => {
-    if (!window.confirm("Are you sure you want to delete this station photo?")) return;
+    if (!window.confirm(t.deleteConfirm)) return;
 
     try {
       const pathParts = imageUrl.split('/storage/v1/object/public/station-photos/');
@@ -138,17 +212,17 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
       if (dbDeleteError) throw dbDeleteError;
 
       setStationPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
-      alert("✅ Photo deleted successfully.");
+      alert(t.deleteSuccess);
 
     } catch (error) {
       console.error("Error removing station photo:", error.message);
-      alert(`❌ Failed to delete photo: ${error.message}`);
+      alert(`${t.deleteFail} ${error.message}`);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim()) return alert("Station name is required.");
+    if (!formData.name.trim()) return alert(t.nameRequired);
     
     setIsSaving(true);
 
@@ -177,9 +251,9 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 text-cyan-400">
               <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
             </svg>
-            Station Hub
+            {t.hubTitle}
           </h3>
-          <p className="text-slate-400 text-xs mt-0.5 w-full px-6">View details, submit suggestions, or leave a review</p>
+          <p className="text-slate-400 text-xs mt-0.5 w-full px-6">{t.hubSubtitle}</p>
           
           <button 
             type="button"
@@ -200,14 +274,14 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5A1.5 1.5 0 0 0 22 18V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
               </svg>
-              Station Photos ({stationPhotos.length})
+              {t.sectionPhotos} ({stationPhotos.length})
             </h4>
 
             {loadingPhotos ? (
-              <p className="text-xs font-bold text-slate-400 animate-pulse py-1">Loading gallery layout...</p>
+              <p className="text-xs font-bold text-slate-400 animate-pulse py-1">{t.loadingLayout}</p>
             ) : stationPhotos.length === 0 ? (
               <div className="text-center py-4 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
-                <p className="text-xs font-medium text-slate-400 italic">No photos shared for this charger yet.</p>
+                <p className="text-xs font-medium text-slate-400 italic">{t.noPhotos}</p>
               </div>
             ) : (
               <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin max-w-full snap-x">
@@ -242,7 +316,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-slate-400">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
-              Upload New Station Photo
+              {t.uploadLabel}
             </label>
             
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -264,7 +338,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
                   </svg>
-                  {uploading ? "Uploading..." : "Upload"}
+                  {uploading ? t.btnUploading : t.btnUpload}
                 </button>
               )}
             </div>
@@ -280,26 +354,26 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Station Name</label>
+              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">{t.labelName}</label>
               <input type="text" name="name" value={formData.name} onChange={handleChange}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 font-bold text-slate-800 text-sm" />
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Network Operator</label>
-              <input type="text" name="operator" value={formData.operator} onChange={handleChange} placeholder="Independent"
+              <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">{t.labelOperator}</label>
+              <input type="text" name="operator" value={formData.operator} onChange={handleChange} placeholder={t.placeholderOperator}
                 className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 font-bold text-slate-800 text-sm" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Price (euro/kWh)</label>
-                <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} placeholder="Free"
+                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">{t.labelPrice}</label>
+                <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} placeholder={t.placeholderFree}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 font-bold text-slate-800 text-sm" />
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Power Output (kW)</label>
-                <input type="number" name="power" value={formData.power} onChange={handleChange} placeholder="N/A"
+                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">{t.labelPower}</label>
+                <input type="number" name="power" value={formData.power} onChange={handleChange} placeholder={t.placeholderNA}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 font-bold text-slate-800 text-sm" />
               </div>
             </div>
@@ -311,7 +385,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5 text-cyan-500">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379L12 21l2.62-2.636c1.152-.086 2.294-.213 3.423-.379 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
                 </svg>
-                Leave your Review
+                {t.reviewLabel}
               </label>
               
               <div className="flex items-center justify-center gap-1.5 mb-3">
@@ -346,7 +420,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  placeholder="Share your charging experience at this location..."
+                  placeholder={t.reviewPlaceholder}
                   rows="2"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-cyan-500 font-medium text-slate-700 text-xs resize-none bg-white"
                 />
@@ -356,14 +430,14 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
             <div className="flex gap-3 mt-2">
               <button type="button" onClick={onClose} disabled={isSaving}
                 className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-black text-xs uppercase py-3 rounded-xl tracking-wider transition-all cursor-pointer disabled:opacity-50">
-                Cancel
+                {t.btnCancel}
               </button>
               <button type="submit" disabled={isSaving}
                 className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white font-black text-xs uppercase py-3 rounded-xl tracking-wider shadow-md shadow-cyan-100 transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
-                {isSaving ? "Saving..." : isAdmin ? "Publish Changes" : "Submit Suggestion"}
+                {isSaving ? t.btnSaving : isAdmin ? t.btnPublish : t.btnSuggest}
               </button>
             </div>
           </form>
@@ -375,13 +449,13 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
               </svg>
-              Community Reviews ({existingReviews.length})
+              {t.sectionReviews} ({existingReviews.length})
             </h4>
 
             {loadingReviews ? (
-              <p className="text-xs font-bold text-slate-400 animate-pulse py-2">Loading reviews...</p>
+              <p className="text-xs font-bold text-slate-400 animate-pulse py-2">{t.loadingReviews}</p>
             ) : existingReviews.length === 0 ? (
-              <p className="text-xs font-medium text-slate-400 italic py-2">No reviews left for this station yet.</p>
+              <p className="text-xs font-medium text-slate-400 italic py-2">{t.noReviews}</p>
             ) : (
               <div className="flex flex-col gap-3">
                 {existingReviews.map((rev) => (
@@ -401,7 +475,7 @@ export default function EditStationModal({ station, onClose, onUpdate, isAdmin }
                       </p>
                     ) : (
                       <p className="text-slate-400 italic text-[11px] mt-0.5">
-                        User rated this station without leaving a comment.
+                        {t.emptyReviewMsg}
                       </p>
                     )}
                   </div>

@@ -10,13 +10,31 @@ import { useAuth } from "./Contexts/AuthContext.jsx";
 import { useStationFilters } from "./Components/useStationFilters.jsx";
 import { useStationData } from "./Components/useStationData.jsx"; 
 
+const appTranslations = {
+  en: {
+    loading: "Loading PlugHub...",
+    map: "Map",
+    list: "List",
+    edits: "Edits",
+    addStation: "Add Station"
+  },
+  bg: {
+    loading: "Зареждане на PlugHub...",
+    map: "Карта",
+    list: "Списък",
+    edits: "Промени",
+    addStation: "Добави Станция"
+  }
+};
+
 function App() {
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin, loading, lang } = useAuth();
   const [activeTab, setActiveTab] = useState("map");
   const [addingStation, setAddingStation] = useState(false);
   const [editingStation, setEditingStation] = useState(null); 
   const [userLocation, setUserLocation] = useState(null);
   const { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest } = useStationData(user, isAdmin, loading);
+  const t = appTranslations[lang || "en"]; 
 
   useEffect(() => {
     if (!user || userLocation) return; 
@@ -45,7 +63,7 @@ function App() {
   if (loading) return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
       <div className="w-12 h-12 border-4 border-cyan-100 border-t-cyan-500 rounded-full animate-spin"></div>
-      <p className="text-slate-400 font-black uppercase tracking-widest text-xs animate-pulse">Loading PlugHub...</p>
+      <p className="text-slate-400 font-black uppercase tracking-widest text-xs animate-pulse">{t.loading}</p>
     </div>
   );
 
@@ -77,7 +95,7 @@ function App() {
                   onClick={() => { setActiveTab(tab); setAddingStation(false); }}
                   className={`px-8 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${activeTab === tab && !addingStation ? "bg-white text-cyan-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
                 >
-                  {tab}
+                  {t[tab]}
                 </button>
               ))}
 
@@ -86,7 +104,7 @@ function App() {
                   onClick={() => { setActiveTab("admin-edits"); setAddingStation(false); }}
                   className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === "admin-edits" && !addingStation ? "bg-amber-500 text-white shadow-sm" : "text-amber-600 hover:bg-amber-50/50"}`}
                 >
-                  Edits
+                  {t.edits}
                 </button>
               )}
             </div>
@@ -97,7 +115,7 @@ function App() {
               onClick={() => setAddingStation(true)} 
               className={`px-8 py-2 rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg active:scale-95 ${addingStation ? "bg-slate-800 text-white" : "bg-cyan-500 hover:bg-cyan-600 text-white shadow-cyan-100"}`}
             >
-              Add Station
+              {t.addStation}
             </button>
           </div>
 
