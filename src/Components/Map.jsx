@@ -13,6 +13,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+const getMetresDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371000; // Radius of the earth in meters
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; 
+};
+
 const mapTranslations = {
   "en": {
     clearRoute: "Clear route",
@@ -32,7 +42,6 @@ const mapTranslations = {
     geoErrorNotSupported: "Geolocation is not supported by your browser.",
     geoErrorUnable: "Unable to retrieve location.",
   }, 
-
   "bg": {
     clearRoute: "Изчисти маршрут",
     youAreHere: "Вие сте тук",
@@ -72,10 +81,18 @@ const userLocationIcon = L.divIcon({
 
 function RecenterMap({ coords }) {
   const map = useMap();
+  const lastCoordsRef = useRef(null);
+
   useEffect(() => {
-    if (coords) {
-      map.flyTo([coords.lat, coords.lng], 13, { animate: true, duration: 1.5 });
+    if (!coords) return;
+    
+    if (lastCoordsRef.current) {
+      const diff = getMetresDistance(lastCoordsRef.current.lat, lastCoordsRef.current.lng, coords.lat, coords.lng);
+      if (diff < 15) return; 
     }
+    
+    lastCoordsRef.current = coords;
+    map.flyTo([coords.lat, coords.lng], 13, { animate: true, duration: 1.5 });
   }, [coords, map]);
   return null;
 }
@@ -83,19 +100,38 @@ function RecenterMap({ coords }) {
 function RoutingMachine({ userCoords, destCoords }) {
   const map = useMap();
   const routingControlRef = useRef(null);
+  const lastCalculatedUserCoordsRef = useRef(null);
 
   useEffect(() => {
     if (!map) return;
+    
     if (!userCoords || !destCoords) {
       if (routingControlRef.current) {
         try { map.removeControl(routingControlRef.current); } catch (e) {}
         routingControlRef.current = null;
       }
+      lastCalculatedUserCoordsRef.current = null;
       return;
     }
+
+    if (routingControlRef.current && lastCalculatedUserCoordsRef.current) {
+      const distanceMoved = getMetresDistance(
+        lastCalculatedUserCoordsRef.current[0], 
+        lastCalculatedUserCoordsRef.current[1], 
+        userCoords[0], 
+        userCoords[1]
+      );
+      
+      if (distanceMoved < 15) {
+        return; 
+      }
+    }
+
     if (routingControlRef.current) {
       try { map.removeControl(routingControlRef.current); } catch (e) {}
     }
+
+    lastCalculatedUserCoordsRef.current = userCoords;
 
     const routingControl = L.Routing.control({
       waypoints: [L.latLng(userCoords[0], userCoords[1]), L.latLng(destCoords[0], destCoords[1])],
@@ -104,7 +140,8 @@ function RoutingMachine({ userCoords, destCoords }) {
       draggableWaypoints: false,
       routeWhileDragging: false,
       createMarker: () => L.marker([0, 0], { opacity: 0 }), 
-      show: false 
+      show: false,
+      itineraryClassName: 'hidden' 
     });
 
     routingControlRef.current = routingControl;
@@ -125,6 +162,18 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
   const [activeRoute, setActiveRoute] = useState(null);
   const { lang } = useAuth();
   const t = mapTranslations[lang || "en"];
+
+  // useEffect(() => {
+  //   if (activeRoute && userLocation) {
+  //     setActiveRoute(prev => {
+  //       if (!prev) return null;
+  //       return {
+  //         ...prev,
+  //         user: [userLocation.lat, userLocation.lng]
+  //       };
+  //     });
+  //   }
+  // }, [userLocation]);
 
   const handleGetDirections = (stationLat, stationLng) => {
     if (userLocation) {

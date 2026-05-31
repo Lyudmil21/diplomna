@@ -9,9 +9,12 @@ import { useState, useEffect } from "react";
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     };
 
-    export function useStationFilters(initialStations, userLocation) {
+    export function useStationFilters(initialStations, initialUserLocation) {
     const [searchQuery, setSearchQuery] = useState("");
     const [sortBy, setSortBy] = useState("distance");
+    const [isTracking, setIsTracking] = useState(false);
+    const [liveLocation, setLiveLocation] = useState(initialUserLocation);
+
     const [filters, setFilters] = useState({
         connector: "all",
         minPower: 0,
@@ -19,6 +22,44 @@ import { useState, useEffect } from "react";
         maxPrice: 2.0,
         minRating: 0
     });
+
+    useEffect(() => {
+      if (!isTracking) return;
+
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser.");
+        setIsTracking(false);
+        return;
+      }
+
+      const updateLocation = () => {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setLiveLocation({
+                lat: position.coords.latitude,
+                lng: position.coords.longitude,
+              });
+              
+            },
+            (error) => {
+              console.error("Error fetching location:", error);
+            },
+
+            {
+              enableHighAccuracy: true, 
+              maximumAge: 0,            
+              timeout: 900,             
+            }
+          );
+        };
+
+        updateLocation();
+
+    const intervalId = setInterval(updateLocation, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [isTracking]);
+
 
   const filteredStations = initialStations
     .filter(s => {
@@ -35,7 +76,7 @@ import { useState, useEffect } from "react";
     })
     .map(s => ({
       ...s,
-      distance: calculateDistance(userLocation?.lat, userLocation?.lng, s.latitude, s.longitude)
+      distance: calculateDistance(liveLocation?.lat, liveLocation?.lng, s.latitude, s.longitude)
     }))
     .sort((a, b) => {
       if (sortBy === "distance") return a.distance - b.distance;
@@ -52,5 +93,5 @@ import { useState, useEffect } from "react";
       return 0;
     });
 
-  return { filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy };
+  return { filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy, isTracking, setIsTracking, liveLocation };
 }

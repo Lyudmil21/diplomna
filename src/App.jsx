@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "./Components/Header.jsx";
 import AuthForm from "./Components/AuthForm.jsx";
 import AddStationForm from "./Components/AddStationForm.jsx";
@@ -16,14 +16,18 @@ const appTranslations = {
     map: "Map",
     list: "List",
     edits: "Edits",
-    addStation: "Add Station"
+    addStation: "Add Station",
+    startTracking: "Start",
+    stopTracking: "Stop"
   },
   bg: {
     loading: "Зареждане на PlugHub...",
     map: "Карта",
     list: "Списък",
     edits: "Редакции",
-    addStation: "Добави Станция"
+    addStation: "Добави Станция",
+    startTracking: "Старт",
+    stopTracking: "Стоп"
   }
 };
 
@@ -32,29 +36,12 @@ function App() {
   const [activeTab, setActiveTab] = useState("map");
   const [addingStation, setAddingStation] = useState(false);
   const [editingStation, setEditingStation] = useState(null); 
-  const [userLocation, setUserLocation] = useState(null);
   const { stations, setStations, handleApprove, handleDelete, handleStationUpdateOrSuggest } = useStationData(user, isAdmin, loading);
   const t = appTranslations[lang || "en"]; 
 
-  useEffect(() => {
-    if (!user || userLocation) return; 
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      },
-      (error) => {
-        console.warn("Location access denied or timed out:", error.message);
-      },
-      { 
-        enableHighAccuracy: true,
-        timeout: 10000, 
-        maximumAge: 0  
-      }
-    );
-  }, [user, userLocation]);
-
-  const { filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy } = useStationFilters(stations, userLocation);
+  const { 
+    filteredStations, searchQuery, setSearchQuery, filters, setFilters, sortBy, setSortBy,isTracking, setIsTracking, liveLocation 
+  } = useStationFilters(stations, null); 
 
   const refreshStationList = (updatedStationId, updatedFields) => {
     setStations(prev => prev.map(s => s.id === updatedStationId ? { ...s, ...updatedFields } : s));
@@ -88,6 +75,21 @@ function App() {
           />
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 my-8 bg-slate-50 p-2 rounded-3xl w-fit mx-auto border border-slate-100 shadow-sm">
+            
+            <button
+              onClick={() => setIsTracking(!isTracking)}
+              className={`px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer flex items-center gap-2 border ${
+                isTracking 
+                  ? "bg-rose-500 hover:bg-rose-600 text-white border-rose-600 animate-pulse shadow-md shadow-rose-100" 
+                  : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-sm"
+              }`}
+            >
+              <span className={`w-2 h-2 rounded-full ${isTracking ? "bg-white animate-ping" : "bg-emerald-500"}`}></span>
+              {isTracking ? t.stopTracking : t.startTracking}
+            </button>
+
+            <div className="w-px h-6 bg-slate-200 hidden sm:block"></div>
+
             <div className="flex bg-slate-200/50 p-1 rounded-2xl">
               {["map", "list"].map((tab) => (
                 <button 
@@ -126,7 +128,7 @@ function App() {
                 onStationAdded={(s) => { setStations(prev => [s, ...prev]); setAddingStation(false); setActiveTab("list"); }} 
               />
             ) : activeTab === "map" ? (
-              <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} userLocation={userLocation}/>
+              <Map stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} userLocation={liveLocation}/>
             ) : activeTab === "list" ? (
               <StationList stations={filteredStations} isAdmin={isAdmin} onApprove={handleApprove} onDelete={handleDelete} onEdit={setEditingStation} />
             ) : (
