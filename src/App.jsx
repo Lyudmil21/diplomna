@@ -22,7 +22,7 @@ const appTranslations = {
     loading: "Зареждане на PlugHub...",
     map: "Карта",
     list: "Списък",
-    edits: "Промени",
+    edits: "Редакции",
     addStation: "Добави Станция"
   }
 };

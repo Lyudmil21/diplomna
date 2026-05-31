@@ -22,8 +22,9 @@ const headerTranslations = {
     network: "Network",
     allNetworks: "All Networks"
   },
+  
   bg: {
-    loggedIn: "Влязъл като",
+    loggedIn: "Влезли сте като",
     logout: "Изход",
     searchPlaceholder: "Търси по град, адрес, име или рейтинг...",
     nearest: "Най-близки",
