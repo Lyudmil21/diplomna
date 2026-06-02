@@ -3,6 +3,16 @@ import { useAuth } from "../Contexts/AuthContext.jsx";
 import { supabase } from "../Services/supabaseClient.jsx";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
+const getMetresDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; 
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; 
+};
+
 const addFormTranslations = {
   en: {
     loginRequired: "You must be logged in to add a station.",
@@ -25,11 +35,12 @@ const addFormTranslations = {
     btnCancel: "Cancel",
     successMsg: "Station submitted for approval!",
     validationError: "Please fill all fields and select location on the map.",
+    duplicateError: "Error: A similar station already exists at this location or address.",
     errorPrefix: "Error adding station: "
   },
 
   bg: {
-    loginRequired: "Трябва да сте влезли в профила си, за да добавите станция.",
+    loginRequired: "Трябва да сте влезли в профила си, за да добавете станция.",
     formTitle: "Добавяне на станция",
     labelName: "Име на станцията",
     placeholderName: "напр. Мол Пловдив",
@@ -49,6 +60,7 @@ const addFormTranslations = {
     btnCancel: "Отказ",
     successMsg: "Станцията е изпратена за одобрение!",
     validationError: "Моля, попълнете всички полета и изберете локация на картата.",
+    duplicateError: "Грешка: Станция със сходни атрибути вече съществува на тази локация или адрес.",
     errorPrefix: "Грешка при добавяне на станция: "
   }
 };
@@ -88,29 +100,58 @@ export default function AddStationForm({ onCancel, onStationAdded }) {
       return;
     }
 
-    const { data, error } = await supabase.from("stations").insert([
-      {
-        name,
-        address,
-        latitude,
-        longitude,
-        operator,
-        power,
-        price,
-        connector_type,
-        added_by: user.id,
-        is_approved: false
-      },
-    ]).select();
+    try {
+      const { data: existingStations, error: fetchError } = await supabase
+        .from("stations")
+        .select("id, address, latitude, longitude, connector_type")
+        .gte("latitude", latitude - 0.01)
+        .lte("latitude", latitude + 0.01)
+        .gte("longitude", longitude - 0.01)
+        .lte("longitude", longitude + 0.01);
 
-    if (error) {
-      setMessage(`${t.errorPrefix}${error.message}`);
-    } else {
+      if (fetchError) throw fetchError;
+
+      if (existingStations && existingStations.length > 0) {
+        const isDuplicate = existingStations.some(station => {
+          const isSameAddress = station.address?.trim().toLowerCase() === address.trim().toLowerCase();
+          const distanceMeters = getMetresDistance(latitude, longitude, station.latitude, station.longitude);
+          const isNearLocation = distanceMeters < 50;
+          const isSimilarConnector = station.connector_type === connector_type;
+
+          return isSameAddress || (isNearLocation && isSimilarConnector);
+        });
+
+        if (isDuplicate) {
+          setMessage(t.duplicateError);
+          return; 
+        }
+      }
+
+      const { data, error: insertError } = await supabase.from("stations").insert([
+        {
+          name,
+          address,
+          latitude,
+          longitude,
+          operator,
+          power,
+          price,
+          connector_type,
+          added_by: user.id,
+          is_approved: false
+        },
+      ]).select();
+
+      if (insertError) throw insertError;
+
       setMessage(t.successMsg);
       if (onStationAdded && data) onStationAdded(data[0]);
       
       setName(""); setAddress(""); setLatitude(null); setLongitude(null);
       setOperator(""); setPower(""); setPrice("");
+
+    } catch (err) {
+      setMessage(`${t.errorPrefix}${err.message}`);
     }
   };
 
