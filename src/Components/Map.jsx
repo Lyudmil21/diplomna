@@ -5,6 +5,7 @@ import L from 'leaflet';
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-routing-machine";
 import { useAuth } from "../Contexts/AuthContext.jsx";
+import { calculateDistance } from "../Utils/geoUtils.jsx";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -12,16 +13,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
-
-const getMetresDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371;
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; 
-};
 
 const mapTranslations = {
   "en": {
@@ -87,7 +78,7 @@ function RecenterMap({ coords }) {
     if (!coords) return;
     
     if (lastCoordsRef.current) {
-      const diff = getMetresDistance(lastCoordsRef.current.lat, lastCoordsRef.current.lng, coords.lat, coords.lng);
+      const diff = calculateDistance(lastCoordsRef.current.lat, lastCoordsRef.current.lng, coords.lat, coords.lng);
       if (diff < 15) return; 
     }
     
@@ -115,7 +106,7 @@ function RoutingMachine({ userCoords, destCoords }) {
     }
 
     if (routingControlRef.current && lastCalculatedUserCoordsRef.current) {
-      const distanceMoved = getMetresDistance(
+      const distanceMoved = calculateDistance(
         lastCalculatedUserCoordsRef.current[0], 
         lastCalculatedUserCoordsRef.current[1], 
         userCoords[0], 
