@@ -2,16 +2,7 @@ import { useState } from "react";
 import { useAuth } from "../Contexts/AuthContext.jsx";
 import { supabase } from "../Services/supabaseClient.jsx";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-
-const getMetresDistance = (lat1, lon1, lat2, lon2) => {
-  const R = 6371; 
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; 
-};
+import { calculateDistance } from "../Utils/geoUtils.jsx";
 
 const addFormTranslations = {
   en: {
@@ -114,7 +105,7 @@ export default function AddStationForm({ onCancel, onStationAdded }) {
       if (existingStations && existingStations.length > 0) {
         const isDuplicate = existingStations.some(station => {
           const isSameAddress = station.address?.trim().toLowerCase() === address.trim().toLowerCase();
-          const distanceMeters = getMetresDistance(latitude, longitude, station.latitude, station.longitude);
+          const distanceMeters = calculateDistance(latitude, longitude, station.latitude, station.longitude);
           const isNearLocation = distanceMeters < 50;
           const isSimilarConnector = station.connector_type === connector_type;
 
