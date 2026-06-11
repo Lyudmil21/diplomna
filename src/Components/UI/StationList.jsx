@@ -1,4 +1,4 @@
-import { useAuth } from "../Contexts/AuthContext.jsx";
+import { useAuth } from "../../Contexts/AuthContext.jsx";
 
 const listTranslations = {
   en: {

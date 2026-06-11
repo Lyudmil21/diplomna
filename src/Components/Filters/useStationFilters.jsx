@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { calculateDistance } from "../Utils/geoUtils.jsx";
+import { calculateDistance } from "../../Utils/geoUtils.jsx";
 
 export function useStationFilters(initialStations, initialUserLocation) {
   const [searchQuery, setSearchQuery] = useState("");

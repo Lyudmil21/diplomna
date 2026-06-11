@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../Contexts/AuthContext.jsx";
-import { supabase } from "../Services/supabaseClient.jsx";
+import { useAuth } from "../../Contexts/AuthContext.jsx";
+import { supabase } from "../../Services/supabaseClient.jsx";
 
 const headerTranslations = {
   en: {

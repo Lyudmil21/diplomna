@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../Services/supabaseClient.jsx"; 
-import { useAuth } from "../Contexts/AuthContext.jsx"; 
+import { supabase } from "../../Services/supabaseClient.jsx"; 
+import { useAuth } from "../../Contexts/AuthContext.jsx"; 
 
 const modalTranslations = {
   en: {

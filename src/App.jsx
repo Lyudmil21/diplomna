@@ -1,13 +1,13 @@
 import { useState } from "react";
-import Header from "./Components/Header.jsx";
+import Header from "./Components/UI/Header.jsx";
 import AuthForm from "./Components/AuthForm.jsx";
-import AddStationForm from "./Components/AddStationForm.jsx";
-import Map from "./Components/Map.jsx";
-import StationList from "./Components/StationList.jsx";
-import EditStationModal from "./Components/EditStationModal.jsx"; 
+import AddStationForm from "./Components/UI/AddStationForm.jsx";
+import Map from "./Components/Map/Map.jsx";
+import StationList from "./Components/UI/StationList.jsx";
+import EditStationModal from "./Components/UI/EditStationModal.jsx"; 
 import AdminEditsDashboard from "./Admin/AdminEdits.jsx"; 
 import { useAuth } from "./Contexts/AuthContext.jsx";
-import { useStationFilters } from "./Components/useStationFilters.jsx";
+import { useStationFilters } from "./Components/Filters/useStationFilters.jsx";
 import { useStationData } from "./Components/useStationData.jsx"; 
 
 const appTranslations = {

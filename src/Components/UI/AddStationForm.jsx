@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useAuth } from "../Contexts/AuthContext.jsx";
-import { supabase } from "../Services/supabaseClient.jsx";
+import { useAuth } from "../../Contexts/AuthContext.jsx";
+import { supabase } from "../../Services/supabaseClient.jsx";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
-import { calculateDistance } from "../Utils/geoUtils.jsx";
+import { calculateDistance } from "../../Utils/geoUtils.jsx";
 
 const addFormTranslations = {
   en: {

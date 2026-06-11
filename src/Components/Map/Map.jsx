@@ -4,8 +4,8 @@ import "leaflet/dist/leaflet.css";
 import L from 'leaflet';
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import "leaflet-routing-machine";
-import { useAuth } from "../Contexts/AuthContext.jsx";
-import { calculateDistance } from "../Utils/geoUtils.jsx";
+import { useAuth } from "../../Contexts/AuthContext.jsx";
+import { calculateDistance } from "../../Utils/geoUtils.jsx";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
