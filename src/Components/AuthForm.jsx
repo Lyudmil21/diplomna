@@ -99,8 +99,8 @@ export default function AuthForm() {
   if (user) {
     return (
       <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-2xl shadow-lg border border-slate-100 text-center relative">
-        <div className="absolute top-4 right-4 bg-slate-50 border border-slate-200 shadow-sm rounded-xl px-2.5 py-1.5 flex items-center gap-2 transition-all hover:border-slate-300">
-          <div className="flex items-center shrink-0 pointer-events-none">
+        <div className="absolute top-4 right-4 bg-slate-50 border border-slate-200 shadow-sm rounded-xl px-2.5 py-1.5 flex items-center gap-2 transition-all hover:border-slate-300 min-w-17.5 h-8 justify-between">
+          <div className="flex items-center gap-1.5 pointer-events-none">
             {lang === "en" ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-4 h-2.5 rounded-sm shrink-0 shadow-sm">
                 <clipPath id="s"><path d="M0 0v30h60V0z"/></clipPath>
@@ -117,18 +117,21 @@ export default function AuthForm() {
                 <path d="M0 2h5v1H0z" fill="#D62612"/>
               </svg>
             )}
+            <span className="text-xs font-black text-slate-700 tracking-wider uppercase">{lang || "en"}</span>
           </div>
+          
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="w-2.5 h-2.5 text-slate-400 pointer-events-none">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+
           <select
             value={lang || "en"}
             onChange={(e) => setLang(e.target.value)}
-            className="bg-transparent text-xs font-black text-slate-700 outline-none pr-1 cursor-pointer tracking-wider uppercase appearance-none h-full z-10"
+            className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-30"
           >
-            <option value="en" className="font-sans font-bold text-slate-800">EN</option>
-            <option value="bg" className="font-sans font-bold text-slate-800">BG</option>
+            <option value="en">EN</option>
+            <option value="bg">BG</option>
           </select>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="w-2.5 h-2.5 text-slate-400 pointer-events-none absolute right-2.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-          </svg>
         </div>
 
         <div className="mb-4 text-cyan-600 flex justify-center mt-6">
@@ -152,8 +155,8 @@ export default function AuthForm() {
   return (
     <div className="max-w-md mx-auto mt-10 bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 relative">
       
-      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm rounded-xl px-2.5 py-1.5 flex items-center gap-2 transition-all hover:border-slate-300 z-20">
-        <div className="flex items-center shrink-0">
+      <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm border border-slate-200 shadow-sm rounded-xl px-2.5 py-1.5 flex items-center gap-2 transition-all hover:border-slate-300 z-20 min-w-17.5 h-8 justify-between">
+        <div className="flex items-center gap-1.5 pointer-events-none">
           {lang === "en" ? (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30" className="w-4 h-2.5 rounded-sm shrink-0 shadow-sm">
               <clipPath id="s"><path d="M0 0v30h60V0z"/></clipPath>
@@ -170,20 +173,21 @@ export default function AuthForm() {
               <path d="M0 2h5v1H0z" fill="#D62612"/>
             </svg>
           )}
+          <span className="text-xs font-black text-slate-700 tracking-wider uppercase">{lang || "en"}</span>
         </div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="w-2.5 h-2.5 text-slate-400 pointer-events-none">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+        </svg>
 
         <select
           value={lang || "en"}
           onChange={(e) => setLang(e.target.value)}
-          className="bg-transparent text-xs font-black text-slate-700 outline-none pr-1 cursor-pointer tracking-wider uppercase appearance-none"
+          className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-30"
         >
-          <option value="en" className="font-sans font-bold text-slate-800">EN</option>
-          <option value="bg" className="font-sans font-bold text-slate-800">BG</option>
+          <option value="en">EN</option>
+          <option value="bg">BG</option>
         </select>
-
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="3" stroke="currentColor" className="w-2.5 h-2.5 text-slate-400 pointer-events-none -ml-1">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-        </svg>
       </div>
 
       <div className="bg-cyan-600 p-8 text-white text-center">
