@@ -32,6 +32,7 @@ const mapTranslations = {
     deleteReject: "Delete / Reject",
     geoErrorNotSupported: "Geolocation is not supported by your browser.",
     geoErrorUnable: "Unable to retrieve location.",
+    arrivalAlert: "You have arrived at your destination!",
   }, 
   "bg": {
     clearRoute: "Изчисти маршрут",
@@ -49,9 +50,10 @@ const mapTranslations = {
     approveStation: "Одобри станцията",
     deleteReject: "Изтрий / Отхвърли",
     geoErrorNotSupported: "Геолокацията не се поддържа от вашия браузър.",
-    geoErrorUnable: "Неуспешно извличане на местоположението."
+    geoErrorUnable: "Неуспешно извличане на местоположението.",
+    arrivalAlert: "Пристигнахте на крайната цел!",
   }
-}
+};
 
 const userLocationIcon = L.divIcon({
   html: `
@@ -98,7 +100,10 @@ function RoutingMachine({ userCoords, destCoords }) {
     
     if (!userCoords || !destCoords) {
       if (routingControlRef.current) {
-        try { map.removeControl(routingControlRef.current); } catch (e) {}
+        try { 
+          routingControlRef.current.setWaypoints([]);
+          map.removeControl(routingControlRef.current); 
+        } catch (e) {}
         routingControlRef.current = null;
       }
       lastCalculatedUserCoordsRef.current = null;
@@ -119,7 +124,10 @@ function RoutingMachine({ userCoords, destCoords }) {
     }
 
     if (routingControlRef.current) {
-      try { map.removeControl(routingControlRef.current); } catch (e) {}
+      try { 
+        routingControlRef.current.setWaypoints([]);
+        map.removeControl(routingControlRef.current); 
+      } catch (e) {}
     }
 
     lastCalculatedUserCoordsRef.current = userCoords;
@@ -140,7 +148,10 @@ function RoutingMachine({ userCoords, destCoords }) {
 
     return () => {
       if (routingControlRef.current) {
-        try { map.removeControl(routingControlRef.current); } catch (e) {}
+        try { 
+          routingControlRef.current.setWaypoints([]);
+          map.removeControl(routingControlRef.current); 
+        } catch (e) {}
         routingControlRef.current = null;
       }
     };
@@ -154,17 +165,30 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
   const { lang } = useAuth();
   const t = mapTranslations[lang || "en"];
 
-  // useEffect(() => {
-  //   if (activeRoute && userLocation) {
-  //     setActiveRoute(prev => {
-  //       if (!prev) return null;
-  //       return {
-  //         ...prev,
-  //         user: [userLocation.lat, userLocation.lng]
-  //       };
-  //     });
-  //   }
-  // }, [userLocation]);
+  useEffect(() => {
+    if (activeRoute && userLocation) {
+      const distanceToStation = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        activeRoute.dest[0],
+        activeRoute.dest[1]
+      );
+
+      if (distanceToStation <= 0.03) {
+        alert(t.arrivalAlert); 
+        setActiveRoute(null); 
+        return;
+      }
+
+      setActiveRoute(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          user: [userLocation.lat, userLocation.lng]
+        };
+      });
+    }
+  }, [userLocation]);
 
   const handleGetDirections = (stationLat, stationLng) => {
     if (userLocation) {
@@ -174,7 +198,7 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
       });
     } else {
       if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser");
+        alert(t.geoErrorNotSupported);
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -184,7 +208,7 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
             dest: [stationLat, stationLng]
           });
         },
-        () => alert("Unable to retrieve location.")
+        () => alert(t.geoErrorUnable)
       );
     }
   };
@@ -256,7 +280,7 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
                       </div>
                     </div>
                     <p className="text-xs font-bold text-cyan-600 uppercase tracking-wide m-0 italic">
-                      {station.operator || "Independent Network"}
+                      {station.operator || t.independentNetwork}
                     </p>
                   </div>
 
@@ -280,7 +304,7 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
                     </div>
                     <div>
                       <span className="text-slate-400 block uppercase font-bold">{t.price}</span>
-                      <span className="font-bold text-emerald-600">{station.price ? `${station.price} euro/kWh` : "Free"}</span>
+                      <span className="font-bold text-emerald-600">{station.price ? `${station.price} euro/kWh` : t.free}</span>
                     </div>
                     {station.distance && station.distance !== Infinity && (
                       <div>
@@ -308,7 +332,7 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
                           <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
                         </svg>
-                       {t.reviewHub}
+                        {t.reviewHub}
                       </button>
                     )}
                   </div>

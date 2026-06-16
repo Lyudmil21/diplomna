@@ -6,6 +6,7 @@ export function useStationFilters(initialStations, initialUserLocation) {
   const [sortBy, setSortBy] = useState("distance");
   const [isTracking, setIsTracking] = useState(false);
   const [liveLocation, setLiveLocation] = useState(initialUserLocation);
+  const [highAccuracy, setHighAccuracy] = useState(true);
 
   const [filters, setFilters] = useState({
     connector: "all",
@@ -24,8 +25,10 @@ export function useStationFilters(initialStations, initialUserLocation) {
       return;
     }
 
-    const updateLocation = () => {
-      navigator.geolocation.getCurrentPosition(
+    let watchId;
+
+    const startWatching = (useHighAccuracy) => {
+      watchId = navigator.geolocation.watchPosition(
         (position) => {
           setLiveLocation({
             lat: position.coords.latitude,
@@ -34,19 +37,33 @@ export function useStationFilters(initialStations, initialUserLocation) {
         },
         (error) => {
           console.error("Error fetching location:", error);
+          
+          if ((error.code === 3 || error.code === 2) && useHighAccuracy) {
+            console.warn("High accuracy failed. Downgrading to low accuracy mode...");
+            setHighAccuracy(false); 
+            navigator.geolocation.clearWatch(watchId); 
+            startWatching(false); 
+          }
         },
         {
-          enableHighAccuracy: true, 
-          maximumAge: 0,            
-          timeout: 900,             
+          enableHighAccuracy: useHighAccuracy, 
+          maximumAge: useHighAccuracy ? 0 : 10000, 
+          timeout: useHighAccuracy ? 6000 : 15000, 
         }
       );
     };
 
-    updateLocation();
-    const intervalId = setInterval(updateLocation, 1000);
+    startWatching(highAccuracy);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [isTracking, highAccuracy]);
+
+  useEffect(() => {
+    if (!isTracking) {
+      setHighAccuracy(true);
+    }
   }, [isTracking]);
 
   const filteredStations = initialStations
