@@ -31,7 +31,7 @@ const addFormTranslations = {
   },
 
   bg: {
-    loginRequired: "Трябва да сте влезли в профила си, за да добавете станция.",
+    loginRequired: "Трябва да сте влезли в профила си, за да добавите станция.",
     formTitle: "Добавяне на станция",
     labelName: "Име на станцията",
     placeholderName: "напр. Мол Пловдив",
