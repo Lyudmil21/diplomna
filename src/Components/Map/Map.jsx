@@ -96,6 +96,12 @@ function RoutingMachine({ userCoords, destCoords }) {
   const lastCalculatedUserCoordsRef = useRef(null);
 
   useEffect(() => {
+    console.log("4. ROUTING MACHINE EFFECT", {
+      userCoords,
+      destCoords,
+      mapExists: !!map
+    });
+    
     if (!map) return;
     
     if (!userCoords || !destCoords) {
@@ -190,28 +196,37 @@ export default function Map({ stations = [], isAdmin, onApprove, onDelete, onEdi
     }
   }, [userLocation]);
 
-  const handleGetDirections = (stationLat, stationLng) => {
-    if (userLocation) {
-      setActiveRoute({
-        user: [userLocation.lat, userLocation.lng],
-        dest: [stationLat, stationLng]
-      });
-    } else {
-      if (!navigator.geolocation) {
-        alert(t.geoErrorNotSupported);
-        return;
+    const handleGetDirections = (stationLat, stationLng) => {
+      console.log("1. GET DIRECTIONS CLICKED", stationLat, stationLng);
+      
+      if (userLocation) {
+        console.log("2. USER LOCATION EXISTS", userLocation);
+
+        setActiveRoute({
+          user: [userLocation.lat, userLocation.lng],
+          dest: [stationLat, stationLng]
+        });
+      } else {
+        console.log("2. NO USER LOCATION");
+
+        if (!navigator.geolocation) {
+          alert(t.geoErrorNotSupported);
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            console.log("3. GEOLOCATION RECEIVED", position.coords);
+
+            setActiveRoute({
+              user: [position.coords.latitude, position.coords.longitude],
+              dest: [stationLat, stationLng]
+            });
+          },
+          () => alert(t.geoErrorUnable)
+        );
       }
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setActiveRoute({
-            user: [position.coords.latitude, position.coords.longitude],
-            dest: [stationLat, stationLng]
-          });
-        },
-        () => alert(t.geoErrorUnable)
-      );
-    }
-  };
+    };
 
   return (
     <div className="flex flex-col items-center mt-4 w-full relative">

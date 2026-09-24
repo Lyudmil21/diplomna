@@ -65,13 +65,18 @@ export const AuthProvider = ({ children }) => {
 
       initializeAuth();
 
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-          lastCheckedUserId.current = null; 
-          isFullyLoaded.current = false;
-          setData(session);
-        }
-      });
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (event, session) => {
+              if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
+                  lastCheckedUserId.current = null;
+                  isFullyLoaded.current = false;
+
+                  setTimeout(() => {
+                      setData(session);
+                  }, 0);
+              }
+          }
+      );
 
       return () => {
         subscription?.unsubscribe();
