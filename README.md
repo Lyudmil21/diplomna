@@ -35,13 +35,13 @@ The project was originally started using ASP.NET, but was later rebuilt with Rea
 
 ## Screenshots
 
-Registration Form
+<h3 align="center">Registration Form</h3>
 ![PlugHub interactive map](screenshots/Screenshot_login.png)
 
-Main Page 
+<h3 align="center">Main Page</h3>
 ![PlugHub interactive map](screenshots/Screenshot_main_admin_page.png)
 
-Admin Panel
+<h3 align="center">Admin Panel</h3>
 ![PlugHub interactive map](screenshots/Screenshot_admin_control_hub.png)
 
 ## Development
