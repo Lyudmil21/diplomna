@@ -33,6 +33,17 @@ The main goal of PlugHub is to provide EV drivers with a simple way to find char
 
 The project was originally started using ASP.NET, but was later rebuilt with React and JavaScript as I became more interested in front-end development.
 
+## Screenshots
+
+Registration Form
+![PlugHub interactive map](screenshots/Screenshot_login.png)
+
+Main Page 
+![PlugHub interactive map](screenshots/Screenshot_main_admin_page.png)
+
+Admin Panel
+![PlugHub interactive map](screenshots/Screenshot_admin_control_hub.png)
+
 ## Development
 
 Git and GitHub were used for version control throughout the development of the project.
